@@ -1,16 +1,16 @@
-type GpuDetailLike = {
+interface GpuDetailLike {
   utilization?: unknown
   usage?: unknown
 }
 
-type GpuReportLike = {
+interface GpuReportLike {
   average_usage?: unknown
   averageUsage?: unknown
   detailed_info?: GpuDetailLike[]
   detailedInfo?: GpuDetailLike[]
 }
 
-export type GpuStatusLike = {
+export interface GpuStatusLike {
   gpu?: unknown
   gpu_average_usage?: unknown
   gpu_detailed_info?: GpuDetailLike[]
