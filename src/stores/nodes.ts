@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { parseNodeGroups } from '@/utils/groupHelper'
-import { gpuUsageFromStatus } from '@/utils/gpuHelper'
 
 /** 流量限制类型 */
 export type TrafficLimitType = 'up' | 'down' | 'min' | 'max' | 'sum'
@@ -238,9 +237,8 @@ const useNodesStore = defineStore('nodes', () => {
       node.time = status.time
     if (node.cpu !== status.cpu)
       node.cpu = status.cpu
-    const gpu = gpuUsageFromStatus(status)
-    if (node.gpu !== gpu)
-      node.gpu = gpu
+    if (node.gpu !== status.gpu)
+      node.gpu = status.gpu
     if (node.ram !== status.ram)
       node.ram = status.ram
     if (node.swap !== status.swap)

@@ -14,7 +14,6 @@ import { useAppStore } from '@/stores/app'
 import { useNodesStore } from '@/stores/nodes'
 import * as financeHelper from '@/utils/financeHelper'
 import { formatBytesPerSecondSplit, formatBytesSplit } from '@/utils/helper'
-import { gpuUsageFromStatus } from '@/utils/gpuHelper'
 import {
   getConnectionCount,
   getExpiryDays,
@@ -250,12 +249,11 @@ const onlineStats = computed<OnlineStats>(() => {
     stats.uploadPeakNode = updateTopMetric(stats.uploadPeakNode, node, node.net_out || 0)
     stats.downloadPeakNode = updateTopMetric(stats.downloadPeakNode, node, node.net_in || 0)
     stats.connectionPeakNode = updateTopMetric(stats.connectionPeakNode, node, getConnectionCount(node))
-    const gpu = gpuUsageFromStatus(node)
-    const hasGpu = Boolean(node.gpu_name?.trim()) || gpu > 0
+    const hasGpu = Boolean(node.gpu_name?.trim()) || (node.gpu || 0) > 0
     if (hasGpu) {
-      stats.totalGpu += gpu
+      stats.totalGpu += node.gpu || 0
       stats.gpuNodeCount += 1
-      stats.gpuPeakNode = updateTopMetric(stats.gpuPeakNode, node, gpu)
+      stats.gpuPeakNode = updateTopMetric(stats.gpuPeakNode, node, node.gpu || 0)
     }
     if (isHighLoadNode(node, appStore.homeHighLoadThreshold))
       stats.highLoadNodes.push(node)

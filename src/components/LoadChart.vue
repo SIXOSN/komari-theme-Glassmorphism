@@ -23,7 +23,6 @@ import { useAppStore } from '@/stores/app'
 import { useNodesStore } from '@/stores/nodes'
 import { getChartSeriesPalette, getLoadChartPalette } from '@/utils/chartPalette'
 import { formatBytes, formatBytesSplit } from '@/utils/helper'
-import { gpuUsageFromStatus } from '@/utils/gpuHelper'
 import { comparePingTaskOrder, createPingTaskOrderMap, metricTags, normalizeMetricSeriesList } from '@/utils/metricSeries'
 import { fillMissingTimePoints } from '@/utils/recordHelper'
 import { getSharedRpc } from '@/utils/rpc'
@@ -289,28 +288,16 @@ function gpuDetailsFromStatus(record: StatusRecord): RecordFormat['gpu_detailed'
   return details
 }
 
-function averageGpuMemoryPercent(details: NonNullable<RecordFormat['gpu_detailed']>): number | null {
-  const percents = Object.values(details)
-    .map(detail => detail.memory)
-    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
-  if (!percents.length)
-    return null
-  return percents.reduce((sum, value) => sum + value, 0) / percents.length
-}
-
 function statusToRecordFormat(records: StatusRecord[]): RecordFormat[] {
   return records.map((r) => {
     const gpuDetailed = gpuDetailsFromStatus(r)
-    const gpu = metricValue(gpuUsageFromStatus(r))
     return {
       client: r.client,
       time: r.time,
       cpu: metricValue(r.cpu),
-      gpu,
-      gpu_usage: gpu,
-      gpu_memory: gpuDetailed
-        ? averageGpuMemoryPercent(gpuDetailed)
-        : null,
+      gpu: metricValue(r.gpu_average_usage ?? r.gpu),
+      gpu_usage: metricValue(r.gpu_average_usage ?? r.gpu),
+      gpu_memory: null,
       gpu_detailed: gpuDetailed,
       ram: metricValue(r.ram),
       ram_total: metricValue(r.ram_total),
@@ -466,6 +453,7 @@ function applyMetricPoint(row: RecordFormat, key: LoadMetricKey, value: number |
       row.gpu_detailed ??= {}
       row.gpu_detailed[deviceIndex] ??= { usage: null, memory: null, temperature: null, device_index: deviceIndex, device_name: getMetricDeviceName(series) }
       row.gpu_detailed[deviceIndex].mem_used = value ?? undefined
+      row.gpu_memory = row.gpu_memory ?? value
       break
     }
     case 'gpu.memory.total': {

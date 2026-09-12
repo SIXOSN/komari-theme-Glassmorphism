@@ -2,7 +2,6 @@ import type { PingRecord, PingTaskInfo, StatusRecord } from '@/utils/rpc'
 import { requestManager } from '@/services/request.service'
 import { ApiError, getSharedApi } from '@/utils/api'
 import { getSharedRpc, RpcError } from '@/utils/rpc'
-import { gpuUsageFromStatus } from '@/utils/gpuHelper'
 
 function numberOrZero(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0
@@ -81,9 +80,7 @@ export function normalizeStatusRecord(record: Partial<StatusRecord>): StatusReco
     client: record.client,
     time: record.time,
     cpu: numberOrZero(record.cpu),
-    gpu: gpuUsageFromStatus(record),
-    gpu_average_usage: gpuUsageFromStatus(record),
-    gpu_detailed_info: record.gpu_detailed_info,
+    gpu: numberOrZero(record.gpu),
     ram: numberOrZero(record.ram),
     ram_total: numberOrZero(record.ram_total),
     swap: numberOrZero(record.swap),
