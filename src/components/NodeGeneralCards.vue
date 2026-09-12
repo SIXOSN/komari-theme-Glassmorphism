@@ -13,8 +13,8 @@ import { UI_CONFIG } from '@/constants/ui'
 import { useAppStore } from '@/stores/app'
 import { useNodesStore } from '@/stores/nodes'
 import * as financeHelper from '@/utils/financeHelper'
-import { formatBytesPerSecondSplit, formatBytesSplit } from '@/utils/helper'
 import { gpuUsageFromStatus } from '@/utils/gpuHelper'
+import { formatBytesPerSecondSplit, formatBytesSplit } from '@/utils/helper'
 import {
   getConnectionCount,
   getExpiryDays,
