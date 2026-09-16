@@ -106,8 +106,11 @@ function countRuntimeAssetReferences(directory: string): number {
 if (!existsSync(resolve(sourceRoot, 'package.json')))
   throw new Error(`komari-web source not found: ${sourceRoot}`)
 
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-execFileSync(npmCommand, ['run', 'build', '--', '--base=/admin-app/'], {
+const npmCommand = process.platform === 'win32' ? (process.env.ComSpec || 'cmd.exe') : 'npm'
+const npmArgs = process.platform === 'win32'
+  ? ['/d', '/s', '/c', 'npm.cmd', 'run', 'build', '--', '--base=/admin-app/']
+  : ['run', 'build', '--', '--base=/admin-app/']
+execFileSync(npmCommand, npmArgs, {
   cwd: sourceRoot,
   stdio: 'inherit',
 })
@@ -147,7 +150,7 @@ cpSync(overrideCss, resolve(targetDir, 'glass-admin.css'))
 
 let commit = 'unknown'
 try {
-  commit = execFileSync('git', ['-c', `safe.directory=${sourceRoot}`, 'rev-parse', 'HEAD'], {
+  commit = execFileSync('git', ['-c', `safe.directory=${sourceRoot.replaceAll('\\', '/')}`, 'rev-parse', 'HEAD'], {
     cwd: sourceRoot,
     encoding: 'utf8',
   }).trim()
@@ -155,7 +158,7 @@ try {
 catch {}
 
 writeFileSync(resolve(targetDir, 'komari-admin-source.json'), `${JSON.stringify({
-  repository: 'https://github.com/komari-monitor/komari-web',
+  repository: 'https://github.com/SIXOSN/komari-web',
   commit,
   synced_at: new Date().toISOString(),
 }, null, 2)}\n`)

@@ -104,6 +104,9 @@ export interface Client {
   hidden: boolean
   traffic_limit: number
   traffic_limit_type: string
+  traffic_reset_day: number
+  traffic_reset_time: string
+  traffic_reset_timezone: string
   created_at: string
   updated_at: string
 }

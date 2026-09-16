@@ -614,3 +614,10 @@
 - Implemented 7 deterministic Playwright baselines: light desktop home, dark mobile home, accessible desktop list, Cobe and tiled earth layouts, light desktop detail and dark mobile detail. All use mocked Komari API/RPC/visitor data, fixed time, disabled animations and hidden dynamic 3D canvas pixels while retaining globe layout boundaries.
 - First baseline generation and repeated comparison both passed 7/7 with system Chrome. Windows system-channel Chrome did not exit cleanly after reporting results, so release validation does not treat that local channel teardown as a product failure; CI installs and runs Playwright's managed Chromium.
 - Added the independent `Visual Regression` workflow for pull requests and `main`, with actual/diff/HTML report artifacts retained for 14 days on failure. Release target is v3.3.0.
+
+## 2026-09-17 SIXOSN per-node traffic cycles and hardened distribution
+
+- In progress: traffic reset configuration moved from global theme settings to each Komari client record. The admin editor owns reset day (`0` disables), local reset time, and IANA timezone; existing clients remain disabled by default so upgrades do not reinterpret stored counters.
+- The theme groups enabled nodes by identical billing windows, queries each window once, and applies usage only to matching nodes. Invalid timezone values fall back to UTC consistently with the backend validator.
+- The embedded admin source is the SIXOSN `komari-web` fork. Remote command execution, web terminal, and remote file-management UI/routes are removed from that build.
+- The matching SIXOSN core and agent use an explicit distribution header in registration, HTTP JSON-RPC, and WebSocket handshakes. The agent updater is pinned to `SIXOSN/komari-agent`; both sides reject the official distribution to prevent cross-updates or accidental pairing.

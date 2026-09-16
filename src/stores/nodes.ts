@@ -42,6 +42,9 @@ export interface NodeData {
   hidden: boolean
   traffic_limit: number
   traffic_limit_type: TrafficLimitType
+  traffic_reset_day: number
+  traffic_reset_time: string
+  traffic_reset_timezone: string
   created_at: string
   updated_at: string
   // Status 信息
@@ -201,6 +204,9 @@ const useNodesStore = defineStore('nodes', () => {
       hidden: client.hidden,
       traffic_limit: client.traffic_limit,
       traffic_limit_type: client.traffic_limit_type as TrafficLimitType,
+      traffic_reset_day: client.traffic_reset_day ?? 0,
+      traffic_reset_time: client.traffic_reset_time || '00:00',
+      traffic_reset_timezone: client.traffic_reset_timezone || 'UTC',
       created_at: client.created_at,
       updated_at: client.updated_at,
       // Status 默认值
@@ -357,6 +363,12 @@ const useNodesStore = defineStore('nodes', () => {
       node.traffic_limit = client.traffic_limit
     if (node.traffic_limit_type !== client.traffic_limit_type)
       node.traffic_limit_type = client.traffic_limit_type as TrafficLimitType
+    if (node.traffic_reset_day !== client.traffic_reset_day)
+      node.traffic_reset_day = client.traffic_reset_day ?? 0
+    if (node.traffic_reset_time !== client.traffic_reset_time)
+      node.traffic_reset_time = client.traffic_reset_time || '00:00'
+    if (node.traffic_reset_timezone !== client.traffic_reset_timezone)
+      node.traffic_reset_timezone = client.traffic_reset_timezone || 'UTC'
     if (node.created_at !== client.created_at)
       node.created_at = client.created_at
     if (node.updated_at !== client.updated_at)
@@ -474,13 +486,21 @@ const useNodesStore = defineStore('nodes', () => {
     }
   }
 
-  function applyTrafficCycleUsage(usage: ReadonlyMap<string, { up: number, down: number }>, start: string, nextReset: string): void {
+  function applyTrafficCycleUsage(usage: ReadonlyMap<string, { up: number, down: number, start: string, nextReset: string }>): void {
     for (const node of nodes.value) {
-      const value = usage.get(node.uuid) ?? { up: 0, down: 0 }
+      const value = usage.get(node.uuid)
+      if (!value) {
+        node.traffic_cycle_up = undefined
+        node.traffic_cycle_down = undefined
+        node.traffic_cycle_start = undefined
+        node.traffic_cycle_next_reset = undefined
+        node.traffic_cycle_ready = false
+        continue
+      }
       node.traffic_cycle_up = Math.max(0, value.up)
       node.traffic_cycle_down = Math.max(0, value.down)
-      node.traffic_cycle_start = start
-      node.traffic_cycle_next_reset = nextReset
+      node.traffic_cycle_start = value.start
+      node.traffic_cycle_next_reset = value.nextReset
       node.traffic_cycle_ready = true
     }
   }

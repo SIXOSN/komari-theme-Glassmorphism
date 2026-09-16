@@ -40,7 +40,7 @@ function validTimezone(value: string): string {
     return value
   }
   catch {
-    return 'Asia/Shanghai'
+    return 'UTC'
   }
 }
 
