@@ -513,7 +513,7 @@
 
 - Release commit: `3710532164e6b58433373199321d2977574e9913`.
 - GitHub Actions run `29428658864`: success.
-- Release: `https://github.com/sanrokamlan-prog/komari-theme-Glassmorphism/releases/tag/v3.1.7`.
+- Release: `https://github.com/SIXOSN/komari-theme-Glassmorphism/releases/tag/v3.1.7`.
 - Published asset: `komari-theme-Glassmorphism-build-3710532.zip`, SHA-256 `ac1a203a53a5d31fdc8a148964e1e64f1659dea7beb9745c906a8731686180a4`.
 - Downloaded asset verification passed: manifest `3.1.7`, `主题设置`, `preview.png` hash equals repository preview, and `dist/index.html` exists.
 - Old preview seen after upgrading is browser cache: komari-web uses `/themes/<short>/<preview>` without a version query. A hard refresh/cleared image cache displays the released image; a durable cache-busting change belongs in komari-web.
@@ -530,7 +530,7 @@
 
 - Release commit: `a52572aea7631239e1c35a47283c74a744a9911d`.
 - GitHub Actions run `29430366028`: success.
-- Release: `https://github.com/sanrokamlan-prog/komari-theme-Glassmorphism/releases/tag/v3.1.8`.
+- Release: `https://github.com/SIXOSN/komari-theme-Glassmorphism/releases/tag/v3.1.8`.
 - Published asset: `komari-theme-Glassmorphism-build-a52572a.zip`, SHA-256 `f4dd86ad26a9a55ebfcecc1c76ac07cdcd5fcfd1883cf608ec4e7f491388ea26`.
 - Downloaded asset verification passed: manifest `3.1.8`, configuration name `主题设置`, `preview.png`, and `dist/index.html` are present.
 

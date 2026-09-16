@@ -132,6 +132,6 @@ Komari Glassmorphism 是一款给 **Komari Monitor** 使用的毛玻璃风格主
 
 ## 项目地址
 
-GitHub：<https://github.com/sanrokamlan-prog/komari-theme-Glassmorphism>
+GitHub：<https://github.com/SIXOSN/komari-theme-Glassmorphism>
 
 如果你正在用 Komari，想要一个更现代、可配置项更多、适合公开展示的毛玻璃主题，可以试试这个版本。
