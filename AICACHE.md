@@ -12,6 +12,17 @@
 
 ## 当前任务
 
+- 状态：done，本地实现和验证完成，待推送至 SIXOSN fork 的 `sixosn/traffic-cycle-default` 分支。
+- 目标：为 SIXOSN 的定制 Komari 增加按指定月日、时间和 IANA 时区自动归零的周期流量统计，并把本主题作为其 Komari fork 的内置默认主题。
+- 里程碑：M5 新功能 + M6 集成/发布流程。
+- 范围：主题托管设置、周期边界计算、Metric Store 聚合服务、共享 composable、节点响应式周期流量字段、所有流量配额/展示入口、构建与默认主题集成工作流。
+- 设计：不修改 Agent 的操作系统累计网卡计数器；使用 Komari 已持久化的 `traffic.up` / `traffic.down` 增量指标，从当前周期起点聚合。到配置时间后周期边界自动推进，界面统计自然归零，并保留原始累计流量作为兼容回退。
+- 默认配置：每月 1 日 00:00，`Asia/Shanghai`；可关闭周期统计或修改日期、时间、IANA 时区。
+- 不做：不改写或删除历史指标；不在主题仓库提交凭据；不发布上游 PR。
+- 实现结果：主题设置新增周期流量开关、每月重置日、重置时间和 IANA 时区；首页卡片、列表、节点详情、对比面板、配额百分比统一使用当前周期聚合值，并在详情页显示下次重置时间。
+- 默认主题集成：SIXOSN 的 Komari fork 构建流程固定从本主题的 `sixosn/traffic-cycle-default` 分支构建并打包为内置 `default` 主题。
+- 验证：`npm run lint`、`npm run type-check`、`npx vite build --configLoader runner` 和 `git diff --check` 通过；生成 `komari-theme-Glassmorphism-build-06999d5.zip`。标准 Vite 配置加载在当前 Windows 沙箱受 esbuild 根目录权限影响，已改为 ESM 安全的 `import.meta.url` 路径并使用 runner 完成同一生产构建。当前环境没有 Go/Bun，因此未执行 Komari Go 测试，也未用 Bun 重跑主题构建。
+
 - 状态：in-progress，本地修复与验证完成，正在发布 v3.3.5
 - 目标：修复详情页延迟任务卡片、图例和主页 Ping 指标线与 Komari 后台任务排序不一致的问题。
 - 里程碑：M4 UI/UX 兼容性修复，不修改后端任务权重或接口契约。

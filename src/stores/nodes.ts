@@ -62,6 +62,11 @@ export interface NodeData {
   net_total_down: number
   traffic_up?: number
   traffic_down?: number
+  traffic_cycle_up?: number
+  traffic_cycle_down?: number
+  traffic_cycle_start?: string
+  traffic_cycle_next_reset?: string
+  traffic_cycle_ready?: boolean
   process: number
   connections: number
   connections_udp: number
@@ -216,6 +221,7 @@ const useNodesStore = defineStore('nodes', () => {
       net_total_down: 0,
       traffic_up: 0,
       traffic_down: 0,
+      traffic_cycle_ready: false,
       process: 0,
       connections: 0,
       connections_udp: 0,
@@ -468,6 +474,27 @@ const useNodesStore = defineStore('nodes', () => {
     }
   }
 
+  function applyTrafficCycleUsage(usage: ReadonlyMap<string, { up: number, down: number }>, start: string, nextReset: string): void {
+    for (const node of nodes.value) {
+      const value = usage.get(node.uuid) ?? { up: 0, down: 0 }
+      node.traffic_cycle_up = Math.max(0, value.up)
+      node.traffic_cycle_down = Math.max(0, value.down)
+      node.traffic_cycle_start = start
+      node.traffic_cycle_next_reset = nextReset
+      node.traffic_cycle_ready = true
+    }
+  }
+
+  function clearTrafficCycleUsage(): void {
+    for (const node of nodes.value) {
+      node.traffic_cycle_up = undefined
+      node.traffic_cycle_down = undefined
+      node.traffic_cycle_start = undefined
+      node.traffic_cycle_next_reset = undefined
+      node.traffic_cycle_ready = false
+    }
+  }
+
   /**
    * 清空所有节点数据
    */
@@ -494,6 +521,8 @@ const useNodesStore = defineStore('nodes', () => {
     updateNodeClients,
     sortNodesByWeight,
     updateWsState,
+    applyTrafficCycleUsage,
+    clearTrafficCycleUsage,
     clearNodes,
   }
 })

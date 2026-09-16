@@ -20,7 +20,8 @@ interface ThemeManifest {
   version?: unknown
 }
 
-const themeJsonPath = resolve(__dirname, 'komari-theme.json')
+const configDir = fileURLToPath(new URL('.', import.meta.url))
+const themeJsonPath = resolve(configDir, 'komari-theme.json')
 const devApiTarget = process.env.VITE_API_TARGET || 'http://127.0.0.1:25774'
 
 function readThemeManifest(): ThemeManifest {
@@ -62,9 +63,9 @@ function komariThemeZip(): Plugin {
     closeBundle: async () => {
       const commitHash = getCommitHash()
       const zipFileName = `komari-theme-Glassmorphism-build-${commitHash}.zip`
-      const distDir = resolve(__dirname, 'dist')
-      const previewPath = resolve(__dirname, 'docs/preview.png')
-      const outputPath = resolve(__dirname, zipFileName)
+      const distDir = resolve(configDir, 'dist')
+      const previewPath = resolve(configDir, 'docs/preview.png')
+      const outputPath = resolve(configDir, zipFileName)
       const themeManifest = readThemeManifest()
       const manifestPreviewName = typeof themeManifest.preview === 'string' && themeManifest.preview.trim()
         ? themeManifest.preview.trim()

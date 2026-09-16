@@ -19,7 +19,8 @@ import { formatCityNameZh } from '@/utils/cityNameHelper'
 import { getCpuBenchmarkRating, getPassMarkCpuLookupUrl } from '@/utils/cpuBenchmark'
 import * as financeHelper from '@/utils/financeHelper'
 import { gpuUsageFromStatus } from '@/utils/gpuHelper'
-import { formatBytesPerSecondWithConfig, formatBytesWithConfig, formatUptimeWithFormat } from '@/utils/helper'
+import { formatBytesPerSecondWithConfig, formatBytesWithConfig, formatDateTime, formatUptimeWithFormat } from '@/utils/helper'
+import { getTrafficCounters, getTrafficUsed } from '@/utils/nodeMetricsHelper'
 import { getOSImage, getOSName } from '@/utils/osImageHelper'
 import { getRegionCode, getRegionDisplayName } from '@/utils/regionHelper'
 
@@ -43,6 +44,7 @@ const activeDetailSection = ref<'overview' | 'load' | 'ping'>('overview')
 const data = computed(() => nodesStore.visibleNodesByUuid.get(String(route.params.id)))
 const detailNodes = computed(() => nodesStore.visibleNodes)
 const detailNodeIndex = computed(() => detailNodes.value.findIndex(node => node.uuid === data.value?.uuid))
+const trafficCounters = computed(() => data.value ? getTrafficCounters(data.value) : { up: 0, down: 0, cycle: false })
 const isFavoriteNode = computed(() => data.value ? appStore.isFavoriteNode(data.value.uuid) : false)
 
 let trafficPeakSeq = 0
@@ -311,18 +313,8 @@ function getDetailMetricCard(key: DetailMetricCardKey): MetricCard {
   const memoryUsage = usagePercentage(node?.ram ?? 0, node?.mem_total ?? 0)
   const swapUsage = usagePercentage(node?.swap ?? 0, node?.swap_total ?? 0)
   const diskUsage = usagePercentage(node?.disk ?? 0, node?.disk_total ?? 0)
-  const nodeTrafficUsed = (() => {
-    const up = node?.net_total_up ?? 0
-    const down = node?.net_total_down ?? 0
-    switch (node?.traffic_limit_type) {
-      case 'up': return up
-      case 'down': return down
-      case 'min': return Math.min(up, down)
-      case 'max': return Math.max(up, down)
-      case 'sum':
-      default: return up + down
-    }
-  })()
+  const nodeTrafficCounters = node ? getTrafficCounters(node) : { up: 0, down: 0, cycle: false }
+  const nodeTrafficUsed = node ? getTrafficUsed(node) : 0
   const nodeTrafficLimit = node?.traffic_limit ?? 0
   const nodeHasTrafficLimit = nodeTrafficLimit > 0
   const nodeTrafficPercentage = nodeHasTrafficLimit
@@ -372,8 +364,8 @@ function getDetailMetricCard(key: DetailMetricCardKey): MetricCard {
       return { key, label: '实时下行', value: speed.value, unit: speed.unit, icon: 'tabler:chevrons-down' }
     }
     case 'totalTraffic': {
-      const traffic = splitMeasurement(formatBytes((node?.net_total_up ?? 0) + (node?.net_total_down ?? 0)))
-      return { key, label: '累计流量', value: traffic.value, unit: traffic.unit, icon: 'tabler:arrows-transfer-up-down', tooltip: `↑ ${formatBytes(node?.net_total_up ?? 0)} / ↓ ${formatBytes(node?.net_total_down ?? 0)}` }
+      const traffic = splitMeasurement(formatBytes(nodeTrafficCounters.up + nodeTrafficCounters.down))
+      return { key, label: nodeTrafficCounters.cycle ? '周期流量' : '累计流量', value: traffic.value, unit: traffic.unit, icon: 'tabler:arrows-transfer-up-down', tooltip: `↑ ${formatBytes(nodeTrafficCounters.up)} / ↓ ${formatBytes(nodeTrafficCounters.down)}` }
     }
     case 'trafficQuota':
       return {
@@ -430,17 +422,7 @@ const storageInfo = computed<InfoItem[]>(() => [
 
 const trafficUsed = computed(() => {
   const node = data.value
-  if (!node)
-    return 0
-  const { net_total_up = 0, net_total_down = 0, traffic_limit_type } = node
-  switch (traffic_limit_type) {
-    case 'up': return net_total_up
-    case 'down': return net_total_down
-    case 'min': return Math.min(net_total_up, net_total_down)
-    case 'max': return Math.max(net_total_up, net_total_down)
-    case 'sum':
-    default: return net_total_up + net_total_down
-  }
+  return node ? getTrafficUsed(node) : 0
 })
 
 const hasTrafficLimit = computed(() => (data.value?.traffic_limit ?? 0) > 0)
@@ -721,7 +703,7 @@ const metricCards = computed<MetricCard[]>(() => appStore.detailMetricCardOrder.
               <div class="relative flex flex-col gap-1.5">
                 <div class="flex gap-1 items-center text-muted-foreground">
                   <Icon icon="icon-park-outline:transfer-data" :width="14" :height="14" />
-                  <span class="text-xs sm:text-sm">总流量</span>
+                  <span class="text-xs sm:text-sm">{{ trafficCounters.cycle ? '本周期流量' : '总流量' }}</span>
                   <Badge
                     v-for="proto in ipSupport" :key="proto" variant="outline"
                     class="!text-[10px] rounded text-emerald-600 border-emerald-600/25 px-1 py-0 leading-none"
@@ -730,10 +712,13 @@ const metricCards = computed<MetricCard[]>(() => appStore.detailMetricCardOrder.
                   </Badge>
                   <div class="flex-1" />
                   <span class="hidden sm:block text-[11px] font-medium text-foreground/70">
-                    {{ formatBytes(data?.net_total_up ?? 0) }} / {{ formatBytes(data?.net_total_down ?? 0) }}
+                    {{ formatBytes(trafficCounters.up) }} / {{ formatBytes(trafficCounters.down) }}
                   </span>
                 </div>
                 <span class="text-xs sm:text-sm break-all">{{ trafficUsageText }}</span>
+                <span v-if="data?.traffic_cycle_ready && data.traffic_cycle_next_reset" class="text-[10px] text-muted-foreground/80 leading-none">
+                  下次重置 {{ formatDateTime(data.traffic_cycle_next_reset) }}
+                </span>
                 <span v-if="hasPeak" class="text-[10px] text-muted-foreground/80 flex items-center gap-2 leading-none">
                   <span>近一天峰值</span>
                   <span class="text-green-600 flex items-center gap-0.5">

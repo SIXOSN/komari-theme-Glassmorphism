@@ -14,7 +14,7 @@ import { UI_CONFIG } from '@/constants/ui'
 import { useAppStore } from '@/stores/app'
 import { formatCityNameZh } from '@/utils/cityNameHelper'
 import { formatBytesPerSecondWithConfig, formatBytesWithConfig, formatDateTime, formatUptimeWithFormat, getStatus } from '@/utils/helper'
-import { getRealtimeTotalSpeed, getTrafficUsed, getTrafficUsedPercentage, hasTrafficLimit } from '@/utils/nodeMetricsHelper'
+import { getRealtimeTotalSpeed, getTrafficCounters, getTrafficUsed, getTrafficUsedPercentage, hasTrafficLimit } from '@/utils/nodeMetricsHelper'
 import { getOSImage, getOSName } from '@/utils/osImageHelper'
 import { getRegionCode, getRegionDisplayName } from '@/utils/regionHelper'
 import { formatPriceWithCycle, getDaysUntilExpired, getExpireStatus, parseTags } from '@/utils/tagHelper'
@@ -561,7 +561,7 @@ function buildNodeMetadataItems(node: NodeData): NodeMetadataItem[] {
                 <div
                   v-else-if="col.key === 'traffic'"
                   class="group min-w-0"
-                  :title="`↑ ${formatBytes(node.net_total_up ?? 0)}\n↓ ${formatBytes(node.net_total_down ?? 0)}`"
+                  :title="`↑ ${formatBytes(getTrafficCounters(node).up)}\n↓ ${formatBytes(getTrafficCounters(node).down)}`"
                 >
                   <div class="space-y-1 w-full">
                     <div class="text-[11px] font-medium text-foreground/75 truncate">
@@ -575,7 +575,7 @@ function buildNodeMetadataItems(node: NodeData): NodeMetadataItem[] {
                       </span>
                     </div>
                     <TrafficProgress
-                      :upload="node.net_total_up ?? 0" :download="node.net_total_down ?? 0"
+                      :upload="getTrafficCounters(node).up" :download="getTrafficCounters(node).down"
                       :traffic-limit="node.traffic_limit" :traffic-limit-type="(node.traffic_limit_type || 'sum')"
                       height="4px"
                     />

@@ -1,25 +1,36 @@
 <div align="center">
 
-# 🌌 Komari Glassmorphism
+# 🌌 SIXOSN Komari Glassmorphism
 
 ## 给 Komari Monitor 的一套「玻璃拟态 · 运维驾驶舱」主题
 
 从好看的监控首页，逐步成长为好用、可配置、适合长期运行的 Komari 主题。
 
-![Version](https://img.shields.io/github/v/release/sanrokamlan-prog/komari-theme-Glassmorphism?style=for-the-badge&label=release&color=10b981)
+![Upstream Version](https://img.shields.io/github/v/release/sanrokamlan-prog/komari-theme-Glassmorphism?style=for-the-badge&label=upstream&color=10b981)
 ![Vue](https://img.shields.io/badge/Vue-3-42b883?style=for-the-badge&logo=vue.js)
 ![Vite](https://img.shields.io/badge/Vite-7-646cff?style=for-the-badge&logo=vite)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4-38bdf8?style=for-the-badge&logo=tailwindcss)
 ![Bun](https://img.shields.io/badge/Bun-%3E%3D1.2-000000?style=for-the-badge&logo=bun)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
 
-**[📥 下载 Release](https://github.com/sanrokamlan-prog/komari-theme-Glassmorphism/releases)** ·
+**[🍴 SIXOSN Fork](https://github.com/SIXOSN/komari-theme-Glassmorphism)** ·
 **[🚀 安装](#-安装--升级)** ·
 **[✨ 功能](#-节点详情页全面升级)** ·
 **[⚙️ 设置](#️-主题设置)** ·
 **[🛠️ 开发](#️-本地开发)**
 
 </div>
+
+---
+
+## 🔄 SIXOSN 定制：周期流量计数
+
+- 根据 Komari Metric Store 中的 `traffic.up` / `traffic.down` 增量统计本周期真实流量，不修改 Agent 的系统累计计数器。
+- 默认每月 1 日 00:00（`Asia/Shanghai`）自动进入新周期；可在后台主题设置中指定每月日期、`HH:mm` 时间和任意 IANA 时区。
+- 流量配额、节点卡片、列表、首页总览、节点对比和详情页统一使用本周期数据，并在详情页显示下次重置时间。
+- Metric Store 暂不可用时安全回退原累计计数，避免监控页面失效。
+
+定制 Komari 核心会在构建时把本 fork 的 `sixosn/traffic-cycle-default` 分支嵌入为默认主题。
 
 ---
 

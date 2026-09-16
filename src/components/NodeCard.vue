@@ -9,7 +9,7 @@ import { ProgressThin } from '@/components/ui/progress-thin'
 import { useNodePingDisplay } from '@/composables/useNodePingDisplay'
 import { useAppStore } from '@/stores/app'
 import { formatBytesPerSecondWithConfig, formatBytesWithConfig, formatDateTime, getStatus, getUptimeDays } from '@/utils/helper'
-import { getDiskPercentage, getMemoryPercentage, getTrafficUsed, getTrafficUsedPercentage, hasTrafficLimit } from '@/utils/nodeMetricsHelper'
+import { getDiskPercentage, getMemoryPercentage, getTrafficCounters, getTrafficUsed, getTrafficUsedPercentage, hasTrafficLimit } from '@/utils/nodeMetricsHelper'
 import { getOSImage, getOSName } from '@/utils/osImageHelper'
 import { getRegionCode, getRegionDisplayName } from '@/utils/regionHelper'
 import { formatCurrencyValue, formatPriceWithCycle, getDaysUntilExpired, getExpireStatus, getRemainingValue, isFreePrice, parseTags } from '@/utils/tagHelper'
@@ -28,6 +28,7 @@ const emit = defineEmits<{
 }>()
 const appStore = useAppStore()
 const isFavorite = computed(() => appStore.isFavoriteNode(props.node.uuid))
+const trafficCounters = computed(() => getTrafficCounters(props.node))
 
 function toggleFavorite(): void {
   appStore.toggleFavoriteNode(props.node.uuid)
@@ -411,11 +412,11 @@ function hasRegion(region: string | null | undefined): boolean {
           <div class="flex flex-col gap-0.5 rounded-lg bg-slate-500/5 min-w-0 overflow-hidden" :class="nodeCardMetricBoxClass">
             <div class="text-[11px] text-muted-foreground flex items-center gap-1">
               <Icon icon="tabler:upload" width="11" height="11" />
-              <span class="truncate min-w-0 overflow-hidden">{{ formatBytes(props.node.net_total_up ?? 0) }}</span>
+              <span class="truncate min-w-0 overflow-hidden">{{ formatBytes(trafficCounters.up) }}</span>
             </div>
             <div class="text-[11px] text-muted-foreground flex items-center gap-1">
               <Icon icon="tabler:download" width="11" height="11" />
-              <span class="truncate min-w-0 overflow-hidden">{{ formatBytes(props.node.net_total_down ?? 0) }}</span>
+              <span class="truncate min-w-0 overflow-hidden">{{ formatBytes(trafficCounters.down) }}</span>
             </div>
           </div>
 

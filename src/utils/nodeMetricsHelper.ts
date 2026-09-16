@@ -16,20 +16,30 @@ export function hasTrafficLimit(node: Pick<NodeData, 'traffic_limit'>): boolean 
   return (node.traffic_limit || 0) > 0
 }
 
-export function getTrafficUsed(node: Pick<NodeData, 'net_total_up' | 'net_total_down' | 'traffic_limit_type'>): number {
-  const { net_total_up = 0, net_total_down = 0, traffic_limit_type } = node
-
-  switch (traffic_limit_type) {
-    case 'up': return net_total_up
-    case 'down': return net_total_down
-    case 'min': return Math.min(net_total_up, net_total_down)
-    case 'max': return Math.max(net_total_up, net_total_down)
-    case 'sum':
-    default: return net_total_up + net_total_down
+export function getTrafficCounters(node: Pick<NodeData, 'net_total_up' | 'net_total_down' | 'traffic_cycle_up' | 'traffic_cycle_down' | 'traffic_cycle_ready'>): { up: number, down: number, cycle: boolean } {
+  const cycle = node.traffic_cycle_ready === true
+  return {
+    up: cycle ? (node.traffic_cycle_up ?? 0) : (node.net_total_up ?? 0),
+    down: cycle ? (node.traffic_cycle_down ?? 0) : (node.net_total_down ?? 0),
+    cycle,
   }
 }
 
-export function getTrafficUsedPercentage(node: Pick<NodeData, 'traffic_limit' | 'net_total_up' | 'net_total_down' | 'traffic_limit_type'>): number {
+export function getTrafficUsed(node: Pick<NodeData, 'net_total_up' | 'net_total_down' | 'traffic_cycle_up' | 'traffic_cycle_down' | 'traffic_cycle_ready' | 'traffic_limit_type'>): number {
+  const { up, down } = getTrafficCounters(node)
+  const { traffic_limit_type } = node
+
+  switch (traffic_limit_type) {
+    case 'up': return up
+    case 'down': return down
+    case 'min': return Math.min(up, down)
+    case 'max': return Math.max(up, down)
+    case 'sum':
+    default: return up + down
+  }
+}
+
+export function getTrafficUsedPercentage(node: Pick<NodeData, 'traffic_limit' | 'net_total_up' | 'net_total_down' | 'traffic_cycle_up' | 'traffic_cycle_down' | 'traffic_cycle_ready' | 'traffic_limit_type'>): number {
   if (!hasTrafficLimit(node))
     return 0
 
@@ -44,8 +54,9 @@ export function getRealtimePeakSpeed(node: Pick<NodeData, 'net_in' | 'net_out'>)
   return Math.max(node.net_in || 0, node.net_out || 0)
 }
 
-export function getTotalTraffic(node: Pick<NodeData, 'net_total_up' | 'net_total_down'>): number {
-  return (node.net_total_up || 0) + (node.net_total_down || 0)
+export function getTotalTraffic(node: Pick<NodeData, 'net_total_up' | 'net_total_down' | 'traffic_cycle_up' | 'traffic_cycle_down' | 'traffic_cycle_ready'>): number {
+  const { up, down } = getTrafficCounters(node)
+  return up + down
 }
 
 export function getConnectionCount(node: Pick<NodeData, 'connections' | 'connections_udp'>): number {

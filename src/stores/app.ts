@@ -123,6 +123,7 @@ export interface ChartDashboardTemplate {
 }
 
 type ThemeSettings = Record<string, unknown>
+const RESET_TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/
 
 /** 固定的字节精度配置 */
 const BYTE_DECIMALS: ByteDecimalsConfig = {
@@ -1004,6 +1005,17 @@ const useAppStore = defineStore('app', () => {
 
   const dataUpdateInterval = computed<number>(() => readNumberSetting(themeSettings.value, 'dataUpdateInterval', 3, 1, 60))
 
+  const trafficCycleEnabled = computed<boolean>(() => readBooleanSetting(themeSettings.value, 'trafficCycleEnabled', true))
+
+  const trafficResetDay = computed<number>(() => Math.trunc(readNumberSetting(themeSettings.value, 'trafficResetDay', 1, 1, 31)))
+
+  const trafficResetTime = computed<string>(() => {
+    const value = readStringSetting(themeSettings.value, 'trafficResetTime', '00:00')
+    return RESET_TIME_PATTERN.test(value) ? value : '00:00'
+  })
+
+  const trafficResetTimezone = computed<string>(() => readStringSetting(themeSettings.value, 'trafficResetTimezone', 'Asia/Shanghai') || 'Asia/Shanghai')
+
   const stopEarth = computed<boolean>(() => readBooleanSetting(themeSettings.value, 'stopEarth', false))
 
   const earthRenderer = computed<EarthRenderer>(() => {
@@ -1313,6 +1325,10 @@ const useAppStore = defineStore('app', () => {
     alertTitle,
     alertContent,
     dataUpdateInterval,
+    trafficCycleEnabled,
+    trafficResetDay,
+    trafficResetTime,
+    trafficResetTimezone,
     stopEarth,
     earthRenderer,
     hideEarth,

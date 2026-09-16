@@ -20,6 +20,7 @@ import {
   getExpiryDays,
   getHighLoadMetrics,
   getRealtimeTotalSpeed,
+  getTrafficCounters,
   getTrafficUsed,
   getTrafficUsedPercentage,
   isExpiringNode,
@@ -274,10 +275,11 @@ const onlineStats = computed<OnlineStats>(() => {
 const totalSpeed = computed(() => onlineStats.value.totalSpeed)
 
 const totalTraffic = computed(() => {
-  const up = summaryNodes.value.reduce((sum, node) => sum + (node.net_total_up || 0), 0)
-  const down = summaryNodes.value.reduce((sum, node) => sum + (node.net_total_down || 0), 0)
+  const up = summaryNodes.value.reduce((sum, node) => sum + getTrafficCounters(node).up, 0)
+  const down = summaryNodes.value.reduce((sum, node) => sum + getTrafficCounters(node).down, 0)
   return { up, down }
 })
+const hasCycleTraffic = computed(() => summaryNodes.value.some(node => node.traffic_cycle_ready))
 
 const formattedTrafficUp = computed(() => formatBytesSplit(totalTraffic.value.up, appStore.byteDecimals))
 const formattedTrafficDown = computed(() => formatBytesSplit(totalTraffic.value.down, appStore.byteDecimals))
@@ -463,7 +465,7 @@ function getCardDefinition(key: GeneralCardKey): GeneralMetricCard {
     case 'totalTraffic':
       return {
         key: 'totalTraffic',
-        label: '累计流量',
+        label: hasCycleTraffic.value ? '本周期流量' : '累计流量',
         icon: 'tabler:download',
         value: totalTrafficTooltip.value.value,
         unit: totalTrafficTooltip.value.unit,
