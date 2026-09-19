@@ -21,9 +21,16 @@ SIXOSN Komari Glassmorphism 是 [`SIXOSN/komari`](https://github.com/SIXOSN/koma
 
 ## 当前版本
 
-- 主题版本：`3.3.8`
-- 配套服务端：`SIXOSN/komari 1.5.0-fix2`
+- 主题版本：`3.3.9`
+- 配套服务端：`SIXOSN/komari 1.5.0-fix3`
 - 管理前端：`SIXOSN/komari-web`
+
+## 更新日志
+
+### 3.3.9
+
+- 后台节点与自动发现的一键安装命令默认使用 `SIXOSN/komari-agent` 的 snapshot 版本。
+- 更新内嵌管理前端，同时继续排除 Service Worker 与远程控制相关界面。
 
 ## 本地开发
 
