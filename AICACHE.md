@@ -12,6 +12,16 @@
 
 ## 当前任务
 
+- 状态：done，本地实现与验证完成，待推送、发布和生产部署确认。
+- 目标：避免旧入口 HTML 或旧 Service Worker 持续引用已被新构建替换的哈希资源；所有后台一键安装命令默认安装 SIXOSN fork 的 snapshot Agent。
+- 范围：Komari 静态资源/SPA 回退与缓存响应、旧 Service Worker 清退、komari-web 三处安装命令生成、内置 admin-app 同步及回归验证。
+- 已确认根因：旧 HTML 请求已不存在的 JS/CSS 时，当前后端把 SPA `index.html` 以 `text/html` 返回，浏览器因此报告模块/CSS MIME 错误；入口页缺少明确的 `no-store`，旧 PWA Service Worker 也可能继续持有旧构建缓存。
+- 安全边界：不修改节点 token 语义，不恢复远程执行/终端/文件管理，不记录任何凭据，不触碰服务器防火墙、Fail2ban 或其他站点。
+- 实现：Komari 入口 HTML 增加 `no-store`/`no-cache`；不存在的带扩展名资源改为 404；普通与受限页面均移除 PWA 注册并注入旧 Worker/Workbox 缓存清理；`/sw.js` 提供一次性退役 Worker。komari-web 的节点、自动发现和详细命令生成器默认使用 SIXOSN 安装脚本与 `--install-version snapshot`，仍允许管理员显式改用其他 fork 版本。
+- 线上证据：修复前 `https://komari.m0n3t2.top/` 无入口缓存控制；截图中的旧 JS/CSS 路径实测返回 `200 text/html`，反代/CDN 还附加 `Cache-Control: max-age=14400`，与普通刷新黑屏完全一致。
+- 验证：komari-web `npm run lint` 为 0 errors/25 个既有 warnings，root 与 `/admin-app/` 两种生产构建通过；主题 `npm run lint`、`npm run build` 通过，嵌入管理端来源为 `9ca095f`，`sw.js`/`registerSW.js` 均不存在。Go 1.25.8 已执行 `go fmt`，纯函数/嵌入归档聚焦单测通过；完整 `web/public` 测试在本机因既有 go-sqlite3 需要 CGO 而无法运行，新增路由测试留给 Linux CI 执行。
+- 交接：推送前提交本次 `public/admin-app` 哈希资产替换与 AICACHE；发布/部署后先核对根页响应含 `no-store`、旧哈希路径为 404、`/sw.js` 为 JavaScript 退役 Worker，再让浏览器做最后一次 Ctrl+F5 以取得新入口并完成旧缓存清退。
+
 - 状态：done，本地实现和验证完成，待推送至 SIXOSN fork 的 `sixosn/traffic-cycle-default` 分支。
 - 目标：为 SIXOSN 的定制 Komari 增加按指定月日、时间和 IANA 时区自动归零的周期流量统计，并把本主题作为其 Komari fork 的内置默认主题。
 - 里程碑：M5 新功能 + M6 集成/发布流程。
